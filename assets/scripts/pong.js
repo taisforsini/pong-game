@@ -1,10 +1,10 @@
 const canvas = document.getElementById("the-canvas");
 const ctx = canvas.getContext("2d");
+const scoreElement = document.getElementById("score");
 
 const player = new Player();
 const ball = new Ball();
 const obstacles = new Obstacles();
-const game = new Game();
 
 document.addEventListener("keydown", (e) => {
   switch (e.keyCode) {
@@ -20,8 +20,13 @@ document.addEventListener("keydown", (e) => {
 function updateCanvas() {
   ctx.clearRect(0, 0, 700, 600);
   ball.drawBall();
+  ball.moveBall();
+  ball.checkPlayerCollision();
+
   player.drawPlayer();
   obstacles.drawObstacles();
+  obstacles.checkObstacleCollision(ball);
+  obstacles.checkWin();
 }
 
 const interval = setInterval(updateCanvas, 10);

@@ -28,52 +28,66 @@ class Player {
 
 class Obstacles {
   constructor() {
-    this.obstacleRow = 6;
+    this.obstacleRow = 5;
     this.obstacleColumn = 5;
     this.obstaclePadding = 15;
-    this.obstacleOffsetTop = 110;
+    this.obstacleOffsetTop = 135;
     this.obstacleOffsetLeft = 550;
     this.obstacles = [];
-  }
+    this.score = 0;
 
-  drawObstacles() {
     for (let i = 0; i < this.obstacleColumn; i++) {
       this.obstacles[i] = [];
       for (let j = 0; j < this.obstacleRow; j++) {
         this.obstacles[i][j] = { x: 0, y: 0, status: 1 };
       }
     }
-
-    for (let col = 0; col < this.obstacleColumn; col++) {
-      for (let row = 0; row < this.obstacleRow; row++) {
-        let xObstacle =
-          col * (15 + this.obstaclePadding) + this.obstacleOffsetLeft;
-        let yObstacle =
-          row * (50 + this.obstaclePadding) + this.obstacleOffsetTop;
-        this.obstacles[col][row].x = xObstacle;
-        this.obstacles[col][row].y = yObstacle;
-        ctx.beginPath();
-        ctx.fillRect(xObstacle, yObstacle, 20, 50);
-        ctx.fillStyle = "white";
-        ctx.closePath();
-      }
-    }
-    this.checkObstacleCollision();
   }
 
-  checkObstacleCollision() {
+  drawObstacles() {
+    for (let col = 0; col < this.obstacleColumn; col++) {
+      for (let row = 0; row < this.obstacleRow; row++) {
+        if (this.obstacles[col][row].status === 1) {
+          let xObstacle =
+            col * (15 + this.obstaclePadding) + this.obstacleOffsetLeft;
+          let yObstacle =
+            row * (50 + this.obstaclePadding) + this.obstacleOffsetTop;
+          this.obstacles[col][row].x = xObstacle;
+          this.obstacles[col][row].y = yObstacle;
+          ctx.beginPath();
+          ctx.fillRect(xObstacle, yObstacle, 20, 50);
+          ctx.fillStyle = "white";
+          ctx.closePath();
+        }
+      }
+    }
+  }
+
+  checkObstacleCollision(ball) {
     for (let c = 0; c < this.obstacleColumn; c++) {
       for (let r = 0; r < this.obstacleRow; r++) {
         let obstacle = this.obstacles[c][r];
         if (
-          ball.xBall > obstacle.xObstacle &&
-          ball.xBall < obstacle.xObstacle + 50 &&
-          ball.yBall > obstacle.yObstacle &&
-          ball.yBall < obstacle.yObstacle + 20
+          ball.xBall > obstacle.x &&
+          ball.xBall < obstacle.x + 20 &&
+          ball.yBall > obstacle.y &&
+          ball.yBall < obstacle.y + 50 &&
+          this.obstacles[c][r].status === 1
         ) {
-          ball.yBallSpeed = -ball.yBallSpeed;
+          ball.xBallSpeed *= -1;
+          this.obstacles[c][r].status = 0;
+          this.score++;
         }
       }
+      score.innerHTML = `Score: ${this.score}`;
+    }
+  }
+
+  checkWin() {
+    if (this.score === this.obstacleRow * this.obstacleColumn) {
+      alert("CONGRATS! YOU WON :)");
+      document.location.reload();
+      clearInterval(interval);
     }
   }
 }
@@ -83,8 +97,8 @@ class Ball {
     this.xBall = 350;
     this.yBall = 300;
     this.radius = 6;
-    this.xBallSpeed = 3;
-    this.yBallSpeed = 0;
+    this.xBallSpeed = -4;
+    this.yBallSpeed = 0.8;
   }
 
   drawBall() {
@@ -93,18 +107,16 @@ class Ball {
     ctx.fillStyle = "yellow";
     ctx.fill();
     ctx.closePath();
-    this.moveBall();
   }
 
   moveBall() {
-    this.checkPlayerCollision();
     this.xBall += this.xBallSpeed;
     this.yBall += this.yBallSpeed;
 
     if (this.xBall + this.radius > 700) {
       this.xBallSpeed *= -1;
     } else if (this.xBall - this.radius < 0) {
-      alert("GAME OVER");
+      alert("OH NO! GAME OVER :(");
       document.location.reload();
       clearInterval(interval);
     } else if (this.yBall + this.radius > 600) {
@@ -123,16 +135,4 @@ class Ball {
       this.xBallSpeed *= -1;
     }
   }
-}
-
-class Game {
-  constructor() {}
-
-  // gameOver() {
-  //   alert("GAME OVER");
-  //     document.location.reload();
-  //     clearInterval(interval);
-  // }
-
-  checkWin() {}
 }
